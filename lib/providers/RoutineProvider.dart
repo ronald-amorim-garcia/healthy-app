@@ -11,10 +11,6 @@ class RoutineProvider extends ChangeNotifier {
   bool _physicalActivity = false;
   double _daysPerWeekActivity = 1;
 
-  // Extra fields
-  double _sleepHours = 8;
-  double _waterIntake = 8;
-
   int _mainMealsPerDay = 3;
   LunchOption _eatingHabits = LunchOption.none;
 
