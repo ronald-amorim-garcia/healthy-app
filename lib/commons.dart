@@ -2,6 +2,7 @@
 // Commons
 export 'package:healthy_app/utils/CustomCheckBox.dart';
 export 'package:healthy_app/utils/CustomSlider.dart';
+export 'package:healthy_app/utils/RecipeUtils.dart';
 
 // Pages
 export 'package:healthy_app/pages/RoutinePage.dart';

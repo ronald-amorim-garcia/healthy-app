@@ -58,18 +58,18 @@ class _MainHealthyState extends State<MainHealthyWidget> {
           ),
           NavigationDestination(
             icon: Badge(child: Icon(Icons.notifications_sharp)),
-            label: 'Notifications',
+            label: 'Plano',
           ),
           NavigationDestination(
             icon: Badge(label: Text('2'), child: Icon(Icons.messenger_sharp)),
-            label: 'Messages',
+            label: 'Restaurantes',
           ),
         ],
       ),
       body: <Widget>[
         HomePage(),
         RoutinePage(),
-        RecipesPage(),
+        RecipePage(),
 
         /// Notifications page
         const Padding(
