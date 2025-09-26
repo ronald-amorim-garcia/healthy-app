@@ -1,177 +1,217 @@
 import 'package:healthy_app/commons.dart';
 
 class RoutinePage extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     final routine = Provider.of<RoutineProvider>(context);
+    final theme = Theme.of(context);
 
     void submitForm() {
       String message = "";
 
       if (routine.college) {
-        message += "Faculdade/escola: ${routine.daysPerWeekCollege.round()} dias por semana\n";
+        message +=
+        "Faculdade/escola: ${routine.daysPerWeekCollege.round()} dias/semana\n";
       }
       if (routine.work) {
-        message += "Trabalho: ${routine.daysPerWeekWork.round()} dias por semana\n";
+        message += "Trabalho: ${routine.daysPerWeekWork.round()} dias/semana\n";
       }
       if (routine.physicalActivity) {
         message +=
-        "Atividade física: ${routine.daysPerWeekActivity.round()} dias por semana\n";
+        "Atividade física: ${routine.daysPerWeekActivity.round()} dias/semana\n";
       }
-      if (message.isEmpty) {
-        message = "Nenhuma atividade selecionada";
-      }
+
+      if (message.isEmpty) message = "Nenhuma atividade selecionada";
 
       showDialog(
         context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 60),
-
-                  const SizedBox(height: 16),
-                  Text(
-                    "Rotina Salva!",
-                    style: TextStyle(
+        builder: (context) => Dialog(
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle, color: theme.colorScheme.secondary, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  "Rotina Salva!",
+                  style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-                  Text (
-                    message,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                      color: theme.colorScheme.secondary),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text(
-                        "Fechar",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text(
+                      "Fechar",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
+      );
+    }
+
+    Widget buildActivityCard({
+      required String label,
+      required bool value,
+      required ValueChanged<bool> onChanged,
+      Widget? slider,
+    }) {
+      return Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 3,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              LabeledCheckBox(
+                label: label,
+                padding: EdgeInsets.zero,
+                value: value,
+                onChanged: onChanged,
+              ),
+              if (value) slider ?? const SizedBox.shrink(),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget buildSimpleCard({
+      required String label,
+      Widget? slider,
+    }) {
+      return Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 3,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: theme.textTheme.titleMedium),
+              ?slider,
+            ],
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('Organize sua rotina')),
+      appBar: AppBar(
+        title: const Text('Rotina'),
+        centerTitle: true,
+        elevation: 2,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Informe o que você realiza na sua semana '
-                  'para que seja possível recomendar sugestões de refeições:',
+              'Informe o que você realiza na sua semana para que possamos recomendar sugestões de refeições:',
               style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
 
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            // Activity Cards with your custom sliders
+            buildActivityCard(
+              label: 'Faculdade ou escola',
+              value: routine.college,
+              onChanged: routine.setCollege,
+              slider: DaysOfWeekSlider(
+                  value: routine.daysPerWeekCollege,
+                  onChanged: routine.setDaysPerWeekCollege),
+            ),
+            buildActivityCard(
+              label: 'Trabalho',
+              value: routine.work,
+              onChanged: routine.setWork,
+              slider: DaysOfWeekSlider(
+                  value: routine.daysPerWeekWork,
+                  onChanged: routine.setDaysPerWeekWork),
+            ),
+            buildActivityCard(
+              label: 'Atividade física',
+              value: routine.physicalActivity,
+              onChanged: routine.setPhysicalActivity,
+              slider: DaysOfWeekSlider(
+                  value: routine.daysPerWeekActivity,
+                  onChanged: routine.setDaysPerWeekActivity),
+            ),
+
+            // Eating habits
+            buildSimpleCard(
+              label: 'Você costuma:',
+              slider: Column(
+                children: [
+                  RadioGroup<LunchOption>(
+                    groupValue: routine.eatingHabits,
+                    onChanged: (LunchOption? value) {
+                      routine.setEatingHabits(value!);
+                    },
+                    child:
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              title: const Text('Não informar'),
+                              leading: Radio<LunchOption>(value: LunchOption.none),
+                            ),
+                            ListTile(
+                              title: const Text('Cozinhar em casa'),
+                              leading: Radio<LunchOption>(value: LunchOption.home),
+                            ),
+                            ListTile(
+                              title: const Text('Pedir delivery'),
+                              leading: Radio<LunchOption>(value: LunchOption.delivery),
+                            ),
+                            ListTile(
+                              title: const Text('Comer em restaurante'),
+                              leading: Radio<LunchOption>(value: LunchOption.dineIn),
+                            ),
+                          ]
+                      ),
+                  ),
+                ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    LabeledCheckBox(
-                      label: 'Faculdade ou escola',
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      value: routine.college,
-                      onChanged: (bool newValue) {
-                        routine.setCollege(newValue);
-                      },
-                    ),
-                    if (routine.college)
-                      DaysOfWeekSlider(
-                        value: routine.daysPerWeekCollege,
-                        onChanged: (double value) {
-                          routine.setDaysPerWeekCollege(value);
-                        },
-                      ),
+            ),
 
-                    Divider(),
+            const SizedBox(height: 20),
 
-                    LabeledCheckBox(
-                      label: 'Trabalho',
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      value: routine.work,
-                      onChanged: (bool newValue) {
-                        routine.setWork(newValue);
-                      },
-                    ),
-                    if (routine.work)
-                      DaysOfWeekSlider(
-                        value: routine.daysPerWeekWork,
-                        onChanged: (double value) {
-                          routine.setDaysPerWeekWork(value);
-                        },
-                      ),
-
-                    Divider(),
-
-                    LabeledCheckBox(
-                      label: 'Atividade física',
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      value: routine.physicalActivity,
-                      onChanged: (bool newValue) {
-                        routine.setPhysicalActivity(newValue);
-                      },
-                    ),
-                    if (routine.physicalActivity)
-                      DaysOfWeekSlider(
-                        value: routine.daysPerWeekActivity,
-                        onChanged: (double value) {
-                          routine.setDaysPerWeekActivity(value);
-                        },
-                      ),
-
-                    Divider(),
-
-                    ElevatedButton.icon(
-                      onPressed: submitForm,
-                      icon: Icon(Icons.check_circle_outline),
-                      label: Text('Enviar rotina'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            ElevatedButton.icon(
+              onPressed: submitForm,
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text('Enviar rotina', style: TextStyle(color: theme.colorScheme.onPrimary)),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                backgroundColor: theme.colorScheme.primary,
               ),
             ),
           ],

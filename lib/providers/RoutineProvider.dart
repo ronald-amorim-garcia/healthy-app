@@ -1,6 +1,7 @@
-import 'package:healthy_app/commons.dart';
+import 'package:flutter/material.dart';
 
-class RoutineProvider extends ChangeNotifier{
+class RoutineProvider extends ChangeNotifier {
+  // Activities
   bool _college = false;
   double _daysPerWeekCollege = 1;
 
@@ -9,6 +10,13 @@ class RoutineProvider extends ChangeNotifier{
 
   bool _physicalActivity = false;
   double _daysPerWeekActivity = 1;
+
+  // Extra fields
+  double _sleepHours = 8;
+  double _waterIntake = 8;
+
+  int _mainMealsPerDay = 3;
+  LunchOption _eatingHabits = LunchOption.none;
 
   // Getters
   bool get college => _college;
@@ -20,7 +28,10 @@ class RoutineProvider extends ChangeNotifier{
   bool get physicalActivity => _physicalActivity;
   double get daysPerWeekActivity => _daysPerWeekActivity;
 
-  // Setters (update + notify listeners)
+  int get mainMealsPerDay => _mainMealsPerDay;
+  LunchOption get eatingHabits => _eatingHabits;
+
+  // Setters with notifyListeners
   void setCollege(bool value) {
     _college = value;
     notifyListeners();
@@ -50,4 +61,16 @@ class RoutineProvider extends ChangeNotifier{
     _daysPerWeekActivity = value;
     notifyListeners();
   }
+
+  void setMainMealsPerDay(int value) {
+    _mainMealsPerDay = value;
+    notifyListeners();
+  }
+
+  void setEatingHabits(LunchOption value) {
+    _eatingHabits = value;
+    notifyListeners();
+  }
 }
+
+enum LunchOption {delivery, dineIn, home, none}
