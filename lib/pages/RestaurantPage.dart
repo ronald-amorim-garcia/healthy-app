@@ -13,7 +13,7 @@ class RestaurantPage extends StatefulWidget {
 class _RestaurantPageState extends State<RestaurantPage> {
   GoogleMapController? mapController;
   LatLng? currentLocation;
-  List places = []; // This will now store places from the new API format
+  List places = [];
 
   // IMPORTANT: Ensure this API key is enabled for the "Places API" (the newer one)
   // in your Google Cloud Console.
@@ -35,14 +35,11 @@ class _RestaurantPageState extends State<RestaurantPage> {
     }
   }
 
-  // --- NEW METHOD using the new Places API ---
   Future<void> _fetchNearbyRestaurantsWithNewApi() async {
     if (currentLocation == null) return;
 
     final url = Uri.parse("https://places.googleapis.com/v1/places:searchText");
 
-    // Define the request body
-    // We'll search for "restaurant" and bias the search to the current location.
     final Map<String, dynamic> requestBody = {
       "textQuery": "restaurant",
       "locationBias": {
@@ -54,8 +51,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
           "radius": 1500.0, // Radius in meters
         }
       },
-      "languageCode": "pt-BR", // Optional: set language for results
-      // "maxResultCount": 10, // Optional: limit number of results
+      "languageCode": "pt-BR",
     };
 
     try {
@@ -67,54 +63,68 @@ class _RestaurantPageState extends State<RestaurantPage> {
           // Specify the fields you want. This is CRUCIAL.
           // Adjust based on what you need for your markers and list.
           "X-Goog-FieldMask":
-          "places.id,places.displayName,places.formattedAddress,places.location,places.primaryTypeDisplayName",
+          "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.photos",
         },
         body: json.encode(requestBody),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print("New API Response: $data"); // For debugging
-
         setState(() {
-          // The new API returns a list under the "places" key
           places = data["places"] ?? [];
         });
       } else {
-        // Handle error
         print("Error fetching places (New API): ${response.statusCode}");
         print("Error body: ${response.body}");
         setState(() {
-          places = []; // Clear places on error
+          places = [];
         });
       }
     } catch (e) {
       print("Exception fetching places (New API): $e");
       setState(() {
-        places = []; // Clear places on exception
+        places = [];
       });
     }
   }
 
-  // --- OLD METHOD (kept for reference, but not used if _setInitialLocation calls the new one) ---
-  // Future<void> _fetchNearbyRestaurants() async {
-  //   if (currentLocation == null) return;
-  //   final url =
-  //       "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-  //       "?location=${currentLocation!.latitude},${currentLocation!.longitude}"
-  //       "&radius=1500&type=restaurant&key=$apiKey";
-  //   final response = await http.get(Uri.parse(url));
-  //   final data = json.decode(response.body);
-  //   setState(() {
-  //     places = data["results"];
-  //   });
-  // }
+  String buildPhotoUrl(String photoName) {
+    return 'https://places.googleapis.com/v1/$photoName/media?key=$apiKey&maxHeightPx=400';
+  }
+
+  void _showRestaurantPopup(BuildContext context, Map<String, dynamic> place) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(place['displayName']?['text'] ?? 'Restaurante'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('Endereço: ${place['formattedAddress'] ?? 'Não disponível'}'),
+                  const SizedBox(height: 8),
+                  Text('Avaliação: ${place['rating'] ?? 'Sem avaliação'}'),
+                ],
+              ),
+          ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Fechar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+        );
+        },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Restaurantes próximos (Nova API)"),
+        title: const Text("Restaurantes próximos"),
         centerTitle: true,
       ),
       body: currentLocation == null
@@ -122,73 +132,160 @@ class _RestaurantPageState extends State<RestaurantPage> {
           : Column(
         children: [
           Expanded(
-            flex: 2,
+            flex: 2, // Map takes 2/3 of the screen
             child: GoogleMap(
               onMapCreated: (controller) => mapController = controller,
               initialCameraPosition: CameraPosition(
                 target: currentLocation!,
                 zoom: 14,
               ),
-              markers: {
-                ...places.map((place) {
-                  // Adapt to the new API response structure
-                  // "geometry"."location"."lat" -> "geometry"."location"."latitude"
-                  // "place_id" -> "id"
-                  // "name" -> "displayName"."text" (if you request displayName as an object)
-                  // "vicinity" -> "formattedAddress"
-
-                  final location = place["location"];
-                  if (location == null || location["latitude"] == null || location["longitude"] == null) {
-                    return const Marker(markerId: MarkerId("invalid_place_data")); // Skip if no location
-                  }
-                  final lat = location["latitude"];
-                  final lng = location["longitude"];
-
-                  String title = "Restaurante"; // Default title
-                  if (place["displayName"] != null && place["displayName"]["text"] != null) {
-                    title = place["displayName"]["text"];
-                  }
-
-                  String snippet = place["formattedAddress"] ?? "Endereço não disponível";
-
-
-                  return Marker(
-                    markerId: MarkerId(place["id"] ?? "unknown_id_${DateTime.now().millisecondsSinceEpoch}" ),
-                    position: LatLng(lat, lng),
-                    infoWindow: InfoWindow(
-                      title: title,
-                      snippet: snippet,
-                    ),
-                  );
-                }).where((marker) => marker.markerId.value != "invalid_place_data").toSet(), // Filter out invalid markers
-              },
+              markers: places.map((place) {
+                final location = place["location"];
+                if (location == null ||
+                    location["latitude"] == null ||
+                    location["longitude"] == null) {
+                  return const Marker(markerId: MarkerId("invalid"));
+                }
+                return Marker(
+                  markerId: MarkerId(place["id"]),
+                  position: LatLng(location["latitude"], location["longitude"]),
+                  infoWindow: InfoWindow(
+                    title: place["displayName"]?["text"] ?? "Restaurante",
+                    snippet: place["formattedAddress"],
+                  ),
+                );
+              }).where((marker) => marker.markerId.value != "invalid").toSet(),
             ),
           ),
           Expanded(
             flex: 1,
-            child: ListView.builder(
+            child: places.isEmpty
+              ? const Center(child: Text("Nenhum restaurante encontrado"))
+              : ListView.builder(
               itemCount: places.length,
               itemBuilder: (context, index) {
                 final place = places[index];
-                // Adapt to new API response structure
-                String name = "Restaurante";
-                if (place["displayName"] != null && place["displayName"]["text"] != null) {
-                  name = place["displayName"]["text"];
-                }
-                String address = place["formattedAddress"] ?? "Sem endereço";
 
-                return Card(
-                  margin: const EdgeInsets.all(8),
-                  child: ListTile(
-                    leading: const Icon(Icons.restaurant),
-                    title: Text(name),
-                    subtitle: Text(address),
-                  ),
+                String? photoUrl;
+                if (place['photos'] != null && place['photos'].isNotEmpty){
+                  photoUrl = buildPhotoUrl(place['photos'][0]['name']);
+                }
+
+                return RestaurantCard(
+                  name: place['displayName']?['text'] ?? 'Nome indisponível',
+                  rating: (place['rating'] as num?)?.toDouble() ?? 0.0,
+                  address: place['formattedAddress'] ?? 'Endereço indisponível',
+                  imageUrl: photoUrl,
+                  onTap: () => _showRestaurantPopup(context, place),
                 );
-              },
-            ),
+              }
+            )
           )
         ],
+      ),
+    );
+  }
+}
+
+class RestaurantCard extends StatelessWidget {
+  const RestaurantCard({
+    super.key,
+    required this.name,
+    required this.rating,
+    required this.address,
+    this.imageUrl,
+    required this.onTap,
+  });
+
+  final String name;
+  final double rating;
+  final String address;
+  final String? imageUrl;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        elevation: 4.0,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Restaurant Image
+            SizedBox(
+              height: 150,
+              child: (imageUrl != null)
+                  ? Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  return progress == null ? child : const Center(
+                      child: CircularProgressIndicator());
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  print("Error loading image: $error");
+                  return const Center(
+                    child: Icon(
+                        Icons.restaurant_menu, size: 50, color: Colors.grey),
+                  );
+                },
+              )
+                  : const Center(
+                child: Icon(
+                    Icons.restaurant_menu, size: 50, color: Colors.grey),
+              ),
+            ),
+            // Restaurant Info
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          address,
+                          style: TextStyle(fontSize: 14.0, color: Colors
+                              .grey[600]),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Rating
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.amber, size: 20),
+                      const SizedBox(width: 4.0),
+                      Text(
+                        rating.toStringAsFixed(1),
+                        style: const TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

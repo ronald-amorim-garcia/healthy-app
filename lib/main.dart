@@ -57,7 +57,8 @@ class _MainHealthyState extends State<MainHealthyWidget> {
             label: 'Receitas',
           ),
           NavigationDestination(
-            icon: Badge(label: Text('2'), child: Icon(Icons.messenger_sharp)),
+            selectedIcon: Icon(Icons.local_restaurant_rounded, color: Colors.white),
+            icon: Icon(Icons.local_restaurant_rounded),
             label: 'Restaurantes',
           ),
         ],
