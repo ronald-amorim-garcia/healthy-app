@@ -122,9 +122,17 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Restaurantes próximos"),
+        title: Text(
+            "Restaurantes próximos",
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold
+            )
+        ),
         centerTitle: true,
       ),
       body: currentLocation == null

@@ -123,7 +123,13 @@ class RoutinePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rotina'),
+        title: Text(
+            'Rotina',
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            )
+        ),
         centerTitle: true,
         elevation: 2,
       ),

@@ -42,11 +42,6 @@ class _MainHealthyState extends State<MainHealthyWidget> {
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
-            selectedIcon: Icon(Icons.home_rounded, color: Colors.white),
-            icon: Icon(Icons.home_rounded),
-            label: 'Inicio',
-          ),
-          NavigationDestination(
             selectedIcon: Icon(Icons.av_timer_rounded, color: Colors.white),
             icon: Icon(Icons.av_timer_rounded),
             label: 'Rotina',
@@ -61,13 +56,18 @@ class _MainHealthyState extends State<MainHealthyWidget> {
             icon: Icon(Icons.local_restaurant_rounded),
             label: 'Restaurantes',
           ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.info_outlined, color: Colors.white,),
+            icon: Icon(Icons.info_outlined),
+            label: 'Sobre',
+          )
         ],
       ),
       body: <Widget>[
-        HomePage(),
         RoutinePage(),
         RecipePage(),
         RestaurantPage(),
+        AboutPage()
       ][currentPageIndex],
     );
   }

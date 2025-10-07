@@ -5,19 +5,21 @@ class RecipePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final recipes = {
       "Café da manhã": [
         {
           "title": "Smoothie de Frutas Vermelhas",
           "image":
-              "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+              "https://images.unsplash.com/photo-1553530666-ba11a7da3888?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           "description":
               "Bebida nutritiva feita com morango, mirtilo, framboesa e iogurte natural.",
         },
         {
           "title": "Omelete Proteica",
           "image":
-              "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+              "https://images.unsplash.com/photo-1668283653825-37b80f055b05?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           "description":
               "Ovos batidos com espinafre, cogumelos e queijo leve, ideal para café da manhã saudável.",
         },
@@ -33,7 +35,7 @@ class RecipePage extends StatelessWidget {
         {
           "title": "Frango Grelhado com Legumes",
           "image":
-              "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+              "https://plus.unsplash.com/premium_photo-1672419800149-d04c372c5113?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
           "description":
               "Frango temperado com ervas, acompanhado de legumes grelhados e azeite de oliva.",
         },
@@ -42,7 +44,7 @@ class RecipePage extends StatelessWidget {
         {
           "title": "Sopa de Legumes",
           "image":
-              "https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+              "https://images.unsplash.com/photo-1716959669858-11d415bdead6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGVndW1lJTIwc291cHxlbnwwfHwwfHx8MA%3D%3D",
           "description":
               "Sopa leve e nutritiva feita com abóbora, cenoura e batata-doce.",
         },
@@ -51,7 +53,13 @@ class RecipePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Receitas"),
+        title: Text(
+            "Receitas",
+          style: TextStyle(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          )
+        ),
         centerTitle: true,
         elevation: 2,
       ),
