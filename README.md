@@ -1,16 +1,29 @@
-# namer_app
+# Healthy App
+A mobile application that uses Flutter. The app contains four main pages.
 
-A new Flutter project.
+## Routine page
+A simple form where user answer some inputs.
 
-## Getting Started
+The idea is use these inputs to generate customized recomentation of recipes.
 
-This project is a starting point for a Flutter application.
+## Recipe page
+A scafold that contains recipes aligned with user routine.
 
-A few resources to get you started if this is your first Flutter project:
+Each recipe is a card with images and if user click in any of them, a dialog appears showing the
+recipe video with description.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Restaurant page
+Composed by a map with nearby restaurants aligned with user routine.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+On screen bottom, it shows a list of these restaurants containing image and a simple description.
+If user click in some place, them a popup with place information is showed.
+
+## About page
+Reserved to describe the app and the product owners.
+
+
+## Technologies
+- Flutter
+- Google Places API
+- Google Maps API
+- Youtube API
